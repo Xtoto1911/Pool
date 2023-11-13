@@ -8,12 +8,13 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="10*"/>
-            <ColumnDefinition Width="10*"/>
-            <ColumnDefinition Width="10*"/>
-            <ColumnDefinition Width="10*"/>
-            <ColumnDefinition Width="10*"/>
-            <ColumnDefinition Width="50*"/>
+            <ColumnDefinition Width="80*"/>
+            <ColumnDefinition Width="80*"/>
+            <ColumnDefinition Width="80*"/>
+            <ColumnDefinition Width="80*"/>
+            <ColumnDefinition Width="80*"/>
+            <ColumnDefinition Width="82*"/>
+            <ColumnDefinition Width="319*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="305*"/>
@@ -22,7 +23,7 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0"
               Grid.Column="0"
-              Grid.ColumnSpan="6">
+              Grid.ColumnSpan="7">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="49.5*"/>
                 <ColumnDefinition Width="1*"/>
@@ -32,8 +33,7 @@
                         Value="100"
                         Maximum="2000" 
                         Orientation="Vertical"
-                         Grid.ColumnSpan="3">
-
+                        Grid.ColumnSpan="3">
                 <ProgressBar.Foreground>
                     <SolidColorBrush Color="Aqua"/>
                 </ProgressBar.Foreground>
@@ -46,34 +46,41 @@
         </Grid>
         <Slider x:Name="sl" 
                 HorizontalAlignment="Left" 
-                Margin="299,38,0,0" 
-                Grid.Row="2" 
+                Grid.Row="1" 
                 VerticalAlignment="Top" 
                 Width="120" 
-                ValueChanged="sl_ValueChanged" 
                 Maximum="20" 
                 Value="1" 
                 Minimum="1" 
-                Grid.Column="5"/>
+                Grid.Column="6" Margin="10,10,0,0"/>
         <Button x:Name="pump1"
                 Content="1" 
                 Grid.Column="0"
-                Grid.Row="2" Click="pump1_Click"/>
+                Grid.Row="1" 
+                Click="pump1_Click"/>
         <Button x:Name="pump2"
                 Content="2" 
                 Grid.Column ="1"
-                Grid.Row="2"/>
+                Grid.Row="1"
+                Click="pump1_Click"/>
         <Button x:Name="pump3"
                 Content="3" 
                 Grid.Column="2"
-                Grid.Row="2"/>
+                Grid.Row="1"
+                Click="pump1_Click"/>
         <Button x:Name="pump4"
                 Content="4" 
                 Grid.Column="3"
-                Grid.Row="2"/>
+                Grid.Row="1"
+                Click="pump1_Click"/>
         <Button x:Name="pump5"
                 Content="5" 
                 Grid.Column="4"
-                Grid.Row="2"/>
+                Grid.Row="1"
+                Click="pump1_Click"/>
+        <Button x:Name="StartStop"
+                Grid.Row="1"
+                Grid.Column="5"
+                Click="StartStop_Click"/>
     </Grid>
 </Window>
