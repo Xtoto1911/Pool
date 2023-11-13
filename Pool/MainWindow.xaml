@@ -57,30 +57,36 @@
                 Content="1" 
                 Grid.Column="0"
                 Grid.Row="1" 
-                Click="pump1_Click"/>
+                Click="pump1_Click">
+        </Button>
         <Button x:Name="pump2"
                 Content="2" 
                 Grid.Column ="1"
                 Grid.Row="1"
-                Click="pump1_Click"/>
+                Click="pump1_Click">
+        </Button>
         <Button x:Name="pump3"
                 Content="3" 
                 Grid.Column="2"
                 Grid.Row="1"
-                Click="pump1_Click"/>
+                Click="pump1_Click">
+        </Button>
         <Button x:Name="pump4"
                 Content="4" 
                 Grid.Column="3"
                 Grid.Row="1"
-                Click="pump1_Click"/>
+                Click="pump1_Click">
+        </Button>
         <Button x:Name="pump5"
                 Content="5" 
                 Grid.Column="4"
                 Grid.Row="1"
-                Click="pump1_Click"/>
+                Click="pump1_Click">
+        </Button>
         <Button x:Name="StartStop"
                 Grid.Row="1"
                 Grid.Column="5"
-                Click="StartStop_Click"/>
+                Click="StartStop_Click">
+        </Button>
     </Grid>
 </Window>
