@@ -12,7 +12,10 @@ namespace Pool
     {
         private int ID {  get; set; }
         private int forse;
-        private int Force
+        private bool isOn = true;
+        private bool isTap;
+
+        public int Force
         {
             get => forse;
             set
@@ -23,11 +26,10 @@ namespace Pool
                     return;
                 }
                 forse = value;
-                
+
             }
         }
-        private bool isOn = true;
-        private bool isTap;
+
         public bool IsOn
         {
             get => isOn;
@@ -39,6 +41,7 @@ namespace Pool
             get => isTap;
             set => isTap = value;
         }
+
         public Pump(int id, int force, bool isTap = false)
         {
             IsTap = isTap;

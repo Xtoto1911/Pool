@@ -61,24 +61,44 @@ namespace Pool
             }
         }
 
+        public int Forse
+        {
+            get
+            {
+                foreach (var pump in listPums)
+                    if (pump.IsTap)
+                        return pump.Force;
+                return 1;
+            }
+            set
+            {
+                foreach (var pump in listPums)
+                    if (pump.IsTap && value != pump.Force)
+                    {
+                        pump.Force = value;
+                    }
+                OnPropertyChanged(nameof(Forse));
+            }
+        }
+
+        public int Speed
+        {
+            get => speed;
+            set
+            {
+                if(value != speed)
+                {
+                    speed = value;
+                    OnPropertyChanged(nameof(Speed));
+                }
+            }
+        }
+
 
         public MainWindow()
         {
             DataContext = this;
             InitializeComponent();
-        }
-
-
-
-        private void pump1_Click(object sender, RoutedEventArgs e)
-        {
-            int currID = int.Parse(((Button)sender).Content.ToString());
-            listPums[currID].IsOn = !listPums[currID].IsOn;
-        }
-
-        private void StartStop_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void StopProgram()
@@ -95,7 +115,7 @@ namespace Pool
 
         private void StartProgram()
         {
-            isWorking = true;   
+            isWorking = true;
             foreach (var pump in listPums)
             {
                 listTasks.Add(Task.Run(() =>
@@ -117,7 +137,7 @@ namespace Pool
 
         private void UpWater(Pump tap)
         {
-            if(WaterLvl < bar.Maximum)
+            if (WaterLvl < bar.Maximum)
                 WaterLvl = tap.Pumping(waterLvl * ups) / ups;
             if (waterLvl >= bar.Maximum * 3 / 4)
                 isDangerZone = true;
@@ -129,6 +149,21 @@ namespace Pool
                 WaterLvl = pump.Pumping(waterLvl * ups) / ups;
             if (waterLvl <= bar.Maximum * 1 / 4)
                 isDangerZone = false;
+        }
+
+
+        private void pump1_Click(object sender, RoutedEventArgs e)
+        {
+            int currID = int.Parse(((Button)sender).Content.ToString());
+            listPums[currID].IsOn = !listPums[currID].IsOn;
+        }
+
+        private void StartStop_Click(object sender, RoutedEventArgs e)
+        {
+            if (listTasks.Count > 0)
+                StopProgram();
+            else
+                StartProgram();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
