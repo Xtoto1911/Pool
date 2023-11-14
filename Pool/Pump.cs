@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace Pool
 {
-    public class Pump
+    public class Pump : INotifyPropertyChanged
     {
-        private int ID {  get; set; }
         private int forse;
         private bool isOn = true;
         private bool isTap;
+        public int Num {  get; set; }
 
         public int Force
         {
@@ -33,7 +33,14 @@ namespace Pool
         public bool IsOn
         {
             get => isOn;
-            set => isOn = value;
+            set
+            {
+                if (isOn != value)
+                {
+                    isOn = value;
+                    OnPropertyChanged(nameof(IsOn));
+                }
+            }
         }
 
         public bool IsTap
@@ -42,16 +49,22 @@ namespace Pool
             set => isTap = value;
         }
 
-        public Pump(int id, int force, bool isTap = false)
+        public Pump(int num, int force, bool isTap = false)
         {
             IsTap = isTap;
-            ID = id;
             Force = force;
+            Num = num;
         }
 
-        public int Pumping(int waterLvL)
+        public int NewWaterLvL(int waterLvL)
         {
             return IsOn ? waterLvL + Force : waterLvL;
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

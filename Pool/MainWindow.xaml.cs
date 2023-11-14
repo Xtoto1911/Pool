@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -27,16 +28,17 @@ namespace Pool
 
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private byte ups = 10;
-        private int speed = 1;
-        private int waterLvl = 0;
+        static byte ups = 10;
+        static int speed = 1;
+        static int waterLvl = 10;
+        static int maxLvl;
 
-        private bool isWorking = false;
-        private bool isDangerZone = false;
+        static bool isWorking = false;
+        static bool isDangerZone = false;
 
-        private List<Pump> listPums = new() 
+        private ObservableCollection<Pump> listPums = new() 
         {
-            new(0,0, true),
+            new(0,100, true),
             new(1,20),
             new(2,20),
             new(3,20),
@@ -46,14 +48,14 @@ namespace Pool
 
         private List<Task> listTasks = new();
 
-        private readonly object lockObj = new object();
+        static Mutex mutex = new Mutex();
 
         public int WaterLvl
         {
             get => waterLvl;
             set
             {
-                if (value != waterLvl)
+                if (waterLvl != value)
                 {
                     waterLvl = value;
                     OnPropertyChanged(nameof(WaterLvl));
@@ -94,11 +96,50 @@ namespace Pool
             }
         }
 
+        public ObservableCollection<Pump> Pumps
+        {
+            get => listPums;
+            set
+            {
+                if (listPums != value)
+                {
+                    listPums = value;
+                    OnPropertyChanged(nameof(Pumps));
+                }
+            }
+        }
+
+        public bool DangerZone
+        {
+            get => isDangerZone;
+            set
+            {
+                if (isDangerZone != value)
+                {
+                    isDangerZone = value;
+                    OnPropertyChanged(nameof(DangerZone));
+                }
+            }
+        }
+
+        public bool IsWorking
+        {
+            get => isWorking;
+            set
+            {
+                if (isWorking != value)
+                {
+                    isWorking = value;
+                    OnPropertyChanged(nameof(IsWorking));
+                }
+            }
+        }
 
         public MainWindow()
         {
             DataContext = this;
             InitializeComponent();
+            maxLvl = (int)Bar.Maximum;
         }
 
         private void StopProgram()
@@ -122,40 +163,39 @@ namespace Pool
                 {
                     while (isWorking)
                     {
-                        lock (lockObj)
-                        {
+                        mutex.WaitOne();
                             if (pump.IsTap)
                                 UpWater(pump);
                             else
                                 DownWater(pump);
-                        }
+                        mutex.ReleaseMutex();
+                        Thread.Sleep(1000 / (ups * speed));
                     }
-                    Thread.Sleep(1000 / (ups * speed));
                 }));
             }
         }
 
-        private void UpWater(Pump tap)
+        void UpWater(Pump tap)
         {
-            if (WaterLvl < bar.Maximum)
-                WaterLvl = tap.Pumping(waterLvl * ups) / ups;
-            if (waterLvl >= bar.Maximum * 3 / 4)
+            if (WaterLvl < maxLvl)
+                WaterLvl = tap.NewWaterLvL(WaterLvl * ups) / ups;
+            if (WaterLvl >= maxLvl * 3 / 4)
                 isDangerZone = true;
         }
 
-        private void DownWater(Pump pump)
+        void DownWater(Pump pump)
         {
             if (isDangerZone)
-                WaterLvl = pump.Pumping(waterLvl * ups) / ups;
-            if (waterLvl <= bar.Maximum * 1 / 4)
+                WaterLvl = pump.NewWaterLvL((int)waterLvl * ups) / ups;
+            if (WaterLvl <= maxLvl * 1 / 4)
                 isDangerZone = false;
         }
 
 
         private void pump1_Click(object sender, RoutedEventArgs e)
         {
-            int currID = int.Parse(((Button)sender).Content.ToString());
-            listPums[currID].IsOn = !listPums[currID].IsOn;
+            int num = int.Parse(((Button)sender).Tag.ToString());
+            listPums[num].IsOn = !listPums[num].IsOn;
         }
 
         private void StartStop_Click(object sender, RoutedEventArgs e)

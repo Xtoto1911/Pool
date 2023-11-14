@@ -7,86 +7,161 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="80*"/>
-            <ColumnDefinition Width="80*"/>
-            <ColumnDefinition Width="80*"/>
-            <ColumnDefinition Width="80*"/>
-            <ColumnDefinition Width="80*"/>
-            <ColumnDefinition Width="82*"/>
-            <ColumnDefinition Width="319*"/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="305*"/>
-            <RowDefinition Height="63*"/>
-            <RowDefinition Height="66*"/>
+            <RowDefinition Height="239*"/>
+            <RowDefinition Height="195*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0"
-              Grid.Column="0"
-              Grid.ColumnSpan="7">
+        <ProgressBar x:Name="Bar"
+                     Orientation="Vertical"
+                     Minimum="0"
+                     Maximum="2000"
+                     Value="{Binding WaterLvl}">
+            <ProgressBar.Foreground>
+                <SolidColorBrush Color="Aqua"/>
+            </ProgressBar.Foreground>
+        </ProgressBar>
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="49.5*"/>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="49.5*"/>
+                <ColumnDefinition Width="50*"/>
+                <ColumnDefinition Width="50*"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar x:Name="bar"
-                        Value="100"
-                        Maximum="2000" 
-                        Orientation="Vertical"
-                        Grid.ColumnSpan="3">
-                <ProgressBar.Foreground>
-                    <SolidColorBrush Color="Aqua"/>
-                </ProgressBar.Foreground>
-            </ProgressBar>
-            <Label x:Name="jet"
-                   Width="1"
-                   Background="Aqua"
-                   Content="" 
-                   Grid.Column="1"/>
+            <ListView ItemsSource="{Binding Pumps}">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplateSelector>
+                    <local:PumpTemplateSelector>
+                        <local:PumpTemplateSelector.PumpOut>
+                            <DataTemplate>
+                                <Button Content="{Binding Num}"
+                                        Tag="{Binding Num}"
+                                        Click="pump1_Click"
+                                        Width="50"
+                                        Height="50">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsOn}" Value="False">
+                                                    <Setter Property="Background" Value="Gray"/>
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsOn}" Value="True"/>
+                                                        <Condition Binding="{Binding DataContext.DangerZone, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Background" Value="Green"/>
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsOn}" Value="True"/>
+                                                        <Condition Binding="{Binding DataContext.DangerZone, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Background" Value="Red"/>
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </local:PumpTemplateSelector.PumpOut>
+                        <local:PumpTemplateSelector.PumpIn>
+                            <DataTemplate>
+                                <Button Content="Труба"
+                                        Tag="{Binding Num}"
+                                        HorizontalContentAlignment="Center"
+                                        Foreground="White"
+                                        Click="pump1_Click"
+                                        Width="50"
+                                        Height="50">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsOn}" Value="False">
+                                                    <Setter Property="Background" Value="Gray"/>
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsOn}" Value="True"/>
+                                                        <Condition Binding="{Binding DataContext.NeedPump, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Background" Value="Yellow"/>
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsOn}" Value="True"/>
+                                                        <Condition Binding="{Binding DataContext.NeedPump, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <MultiDataTrigger.Setters>
+                                                        <Setter Property="Background" Value="Blue"/>
+                                                    </MultiDataTrigger.Setters>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </local:PumpTemplateSelector.PumpIn>
+                    </local:PumpTemplateSelector>
+                </ListView.ItemTemplateSelector>
+            </ListView>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="65*"/>
+                    <RowDefinition Height="61*"/>
+                    <RowDefinition Height="69*"/>
+                </Grid.RowDefinitions>
+                <StackPanel>
+                    <Label Content="{Binding Forse, 
+                                             StringFormat= Заполнение {0} л/с}"/>
+                    <Slider Value="{Binding Forse, 
+                                        Mode=TwoWay, 
+                                        UpdateSourceTrigger=PropertyChanged}"
+                            Maximum="100"
+                            Minimum="1"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1"
+                            >
+                    <Label Content="{Binding Speed, 
+                                             StringFormat= Ускорение {0}}"/>
+                    <Slider Value="{Binding Speed, 
+                                            Mode=TwoWay, 
+                                            UpdateSourceTrigger=PropertyChanged}"
+                            Maximum="3"
+                            Minimum="1"/>
+                </StackPanel>
+                <Button Height="50"
+                        Width="50"
+                        Click="StartStop_Click"
+                        Foreground="White"
+                        Grid.Row="2">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsWorking}" Value="True">
+                                    <Setter Property="Content" Value="Работает"/>
+                                    <Setter Property="Background" Value="Green"/>
+                                    <Setter Property="Content" Value="Выключить"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsWorking}" Value="False">
+                                    <Setter Property="Content" Value="Выключенно"/>
+                                    <Setter Property="Background" Value="Red"/>
+                                    <Setter Property="Content" Value="Включить"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
         </Grid>
-        <Slider x:Name="sl" 
-                HorizontalAlignment="Left" 
-                Grid.Row="1" 
-                VerticalAlignment="Top" 
-                Width="120" 
-                Maximum="20" 
-                Value="1" 
-                Minimum="1" 
-                Grid.Column="6" Margin="10,10,0,0"/>
-        <Button x:Name="pump1"
-                Content="1" 
-                Grid.Column="0"
-                Grid.Row="1" 
-                Click="pump1_Click">
-        </Button>
-        <Button x:Name="pump2"
-                Content="2" 
-                Grid.Column ="1"
-                Grid.Row="1"
-                Click="pump1_Click">
-        </Button>
-        <Button x:Name="pump3"
-                Content="3" 
-                Grid.Column="2"
-                Grid.Row="1"
-                Click="pump1_Click">
-        </Button>
-        <Button x:Name="pump4"
-                Content="4" 
-                Grid.Column="3"
-                Grid.Row="1"
-                Click="pump1_Click">
-        </Button>
-        <Button x:Name="pump5"
-                Content="5" 
-                Grid.Column="4"
-                Grid.Row="1"
-                Click="pump1_Click">
-        </Button>
-        <Button x:Name="StartStop"
-                Grid.Row="1"
-                Grid.Column="5"
-                Click="StartStop_Click">
-        </Button>
     </Grid>
 </Window>
