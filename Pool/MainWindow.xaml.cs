@@ -144,8 +144,8 @@ namespace Pool
 
         private void StopProgram()
         {
-            isWorking = false;
-            isDangerZone = false;
+            IsWorking = false;
+            DangerZone = false;
             foreach (var task in listTasks)
             {
                 task.Wait();
@@ -156,12 +156,12 @@ namespace Pool
 
         private void StartProgram()
         {
-            isWorking = true;
+            IsWorking = true;
             foreach (var pump in listPums)
             {
                 listTasks.Add(Task.Run(() =>
                 {
-                    while (isWorking)
+                    while (IsWorking)
                     {
                         mutex.WaitOne();
                             if (pump.IsTap)
@@ -186,7 +186,7 @@ namespace Pool
         void DownWater(Pump pump)
         {
             if (isDangerZone)
-                WaterLvl = pump.NewWaterLvL((int)waterLvl * ups) / ups;
+                WaterLvl = pump.NewWaterLvL(WaterLvl * ups) / ups;
             if (WaterLvl <= maxLvl * 1 / 4)
                 DangerZone = false;
         }
