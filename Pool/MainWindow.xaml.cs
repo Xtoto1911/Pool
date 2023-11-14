@@ -180,7 +180,7 @@ namespace Pool
             if (WaterLvl < maxLvl)
                 WaterLvl = tap.NewWaterLvL(WaterLvl * ups) / ups;
             if (WaterLvl >= maxLvl * 3 / 4)
-                isDangerZone = true;
+                DangerZone = true;
         }
 
         void DownWater(Pump pump)
@@ -188,7 +188,7 @@ namespace Pool
             if (isDangerZone)
                 WaterLvl = pump.NewWaterLvL((int)waterLvl * ups) / ups;
             if (WaterLvl <= maxLvl * 1 / 4)
-                isDangerZone = false;
+                DangerZone = false;
         }
 
 

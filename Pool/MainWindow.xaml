@@ -85,12 +85,12 @@
                                         <Style TargetType="Button">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsOn}" Value="False">
-                                                    <Setter Property="Background" Value="Gray"/>
+                                                    <Setter Property="Background" Value="Red"/>
                                                 </DataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding IsOn}" Value="True"/>
-                                                        <Condition Binding="{Binding DataContext.NeedPump, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
+                                                        <Condition Binding="{Binding DataContext.DangerZone, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
                                                     </MultiDataTrigger.Conditions>
                                                     <MultiDataTrigger.Setters>
                                                         <Setter Property="Background" Value="Yellow"/>
@@ -99,10 +99,10 @@
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding IsOn}" Value="True"/>
-                                                        <Condition Binding="{Binding DataContext.NeedPump, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"/>
+                                                        <Condition Binding="{Binding DataContext.DangerZone, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"/>
                                                     </MultiDataTrigger.Conditions>
                                                     <MultiDataTrigger.Setters>
-                                                        <Setter Property="Background" Value="Blue"/>
+                                                        <Setter Property="Background" Value="Green"/>
                                                     </MultiDataTrigger.Setters>
                                                 </MultiDataTrigger>
                                             </Style.Triggers>
@@ -121,18 +121,25 @@
                     <RowDefinition Height="69*"/>
                 </Grid.RowDefinitions>
                 <StackPanel>
-                    <Label Content="{Binding Forse, 
-                                             StringFormat= Заполнение {0} л/с}"/>
+                    <Label VerticalAlignment="Top"
+                            Height="Auto">
+                        <TextBlock Text="{Binding Forse, StringFormat= Заполнение {0} л/с}"
+                                    TextWrapping="Wrap"/>
+                    </Label>
                     <Slider Value="{Binding Forse, 
                                         Mode=TwoWay, 
                                         UpdateSourceTrigger=PropertyChanged}"
                             Maximum="100"
-                            Minimum="1"/>
+                            Minimum="1"
+                            />
                 </StackPanel>
                 <StackPanel Grid.Row="1"
                             >
-                    <Label Content="{Binding Speed, 
-                                             StringFormat= Ускорение {0}}"/>
+                    <Label VerticalAlignment="Top"
+                           Height="Auto">
+                        <TextBlock Text="{Binding Speed, StringFormat= Ускорение {0} л/с}"
+                                   TextWrapping="Wrap"/>
+                    </Label>
                     <Slider Value="{Binding Speed, 
                                             Mode=TwoWay, 
                                             UpdateSourceTrigger=PropertyChanged}"
