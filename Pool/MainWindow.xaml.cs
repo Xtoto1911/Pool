@@ -46,8 +46,6 @@ namespace Pool
             new(5,20),
         };
 
-        private List<Task> listTasks = new();
-
         static Mutex mutex = new Mutex();
 
         public int WaterLvl
@@ -58,6 +56,10 @@ namespace Pool
                 if (waterLvl != value)
                 {
                     waterLvl = value;
+                    if(waterLvl >= maxLvl * 3/4)
+                        DangerZone = true;
+                    else if(waterLvl <= maxLvl * 1/4)
+                        DangerZone = false;
                     OnPropertyChanged(nameof(WaterLvl));
                 }
             }
@@ -76,9 +78,7 @@ namespace Pool
             {
                 foreach (var pump in listPums)
                     if (pump.IsTap && value != pump.Force)
-                    {
                         pump.Force = value;
-                    }
                 OnPropertyChanged(nameof(Forse));
             }
         }
@@ -144,66 +144,38 @@ namespace Pool
 
         private void StopProgram()
         {
-            IsWorking = false;
-            DangerZone = false;
-            foreach (var task in listTasks)
-            {
-                task.Wait();
-                task.Dispose();
-            }
-            listTasks.Clear();
+            
         }
 
         private void StartProgram()
         {
-            IsWorking = true;
-            foreach (var pump in listPums)
-            {
-                listTasks.Add(Task.Run(() =>
-                {
-                    while (IsWorking)
-                    {
-                        mutex.WaitOne();
-                            if (pump.IsTap)
-                                UpWater(pump);
-                            else
-                                DownWater(pump);
-                        mutex.ReleaseMutex();
-                        Thread.Sleep(1000 / (ups * speed));
-                    }
-                }));
-            }
+            
         }
 
         void UpWater(Pump tap)
         {
-            if (WaterLvl < maxLvl)
-                WaterLvl = tap.NewWaterLvL(WaterLvl * ups) / ups;
-            if (WaterLvl >= maxLvl * 3 / 4)
-                DangerZone = true;
+            
         }
 
         void DownWater(Pump pump)
         {
-            if (isDangerZone)
-                WaterLvl = pump.NewWaterLvL(WaterLvl * ups) / ups;
-            if (WaterLvl <= maxLvl * 1 / 4)
-                DangerZone = false;
+            
         }
 
+        private void Work(Pump pump)
+        {
+            
+        }
 
-        private void pump1_Click(object sender, RoutedEventArgs e)
+        private async void pump1_Click(object sender, RoutedEventArgs e)
         {
             int num = int.Parse(((Button)sender).Tag.ToString());
-            listPums[num].IsOn = !listPums[num].IsOn;
+            
         }
 
         private void StartStop_Click(object sender, RoutedEventArgs e)
         {
-            if (listTasks.Count > 0)
-                StopProgram();
-            else
-                StartProgram();
+            
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
