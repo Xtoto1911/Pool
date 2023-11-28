@@ -14,6 +14,8 @@ namespace Pool
 
         public int ID { get; set; }
         private int ups = 10;
+        private int forse;
+        private int speed = 1;
         private static int currentLvl = 1;
         private bool isOn = true;
         private bool isPowered = true;  
@@ -26,10 +28,30 @@ namespace Pool
         public event PumpEvent SetWater;
 
 
-        public int Forse {  get; set; }
+        public int Forse 
+        {
+            get => forse;
+            set
+            {
+                if (forse != value)
+                {
+                    forse = value;
+                }
+            }
+        }
         
 
-        public int Speed {  get; set; }
+        public int Speed
+        {
+            get => speed;
+            set
+            {
+                if (speed != value)
+                {
+                    speed = value;
+                }
+            }
+        }
 
         public bool IsOn
         {
