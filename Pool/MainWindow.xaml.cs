@@ -28,25 +28,23 @@ namespace Pool
 
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        static byte ups = 10;
         static int speed = 1;
         static int waterLvl = 10;
         static int maxLvl;
+        static int forse;
 
         static bool isWorking = false;
         static bool isDangerZone = false;
 
         private ObservableCollection<Pump> listPums = new() 
         {
-            new(0,100, true),
-            new(1,20),
-            new(2,20),
-            new(3,20),
-            new(4,20),
-            new(5,20),
+            new(0,100),
+            new(1,-20),
+            new(2,-20),
+            new(3,-20),
+            new(4,-20),
+            new(5,-20),
         };
-
-        static Mutex mutex = new Mutex();
 
         public int WaterLvl
         {
@@ -55,10 +53,12 @@ namespace Pool
             {
                 if (waterLvl != value)
                 {
-                    waterLvl = value;
-                    if(waterLvl >= maxLvl * 3/4)
+                    waterLvl = Math.Min(maxLvl,value);
+                    if (waterLvl < 0)
+                        waterLvl = 1;
+                    if (waterLvl >= maxLvl * 3/4)
                         DangerZone = true;
-                    else if(waterLvl <= maxLvl * 1/4)
+                    if (waterLvl <= maxLvl * 1/4)
                         DangerZone = false;
                     OnPropertyChanged(nameof(WaterLvl));
                 }
@@ -67,19 +67,14 @@ namespace Pool
 
         public int Forse
         {
-            get
-            {
-                foreach (var pump in listPums)
-                    if (pump.IsTap)
-                        return pump.Force;
-                return 1;
-            }
+            get => listPums[0].Forse;
             set
             {
-                foreach (var pump in listPums)
-                    if (pump.IsTap && value != pump.Force)
-                        pump.Force = value;
-                OnPropertyChanged(nameof(Forse));
+                if (forse != value)
+                {
+                    listPums[0].Forse = value;
+                    OnPropertyChanged(nameof(Forse));
+                }
             }
         }
 
@@ -91,6 +86,8 @@ namespace Pool
                 if(value != speed)
                 {
                     speed = value;
+                    foreach (var item in listPums)
+                        item.Speed = speed;
                     OnPropertyChanged(nameof(Speed));
                 }
             }
@@ -117,6 +114,22 @@ namespace Pool
                 if (isDangerZone != value)
                 {
                     isDangerZone = value;
+                    if (DangerZone)
+                    {
+                        foreach (var pump in listPums)
+                        {
+                            if (pump.IsPowered)
+                                pump.StartThred();
+                        }
+                    }
+                    else
+                    {
+                        foreach (var pump in listPums)
+                        {
+                            if(pump.IsPowered)
+                                pump.StopThred();
+                        }
+                    }
                     OnPropertyChanged(nameof(DangerZone));
                 }
             }
@@ -142,46 +155,46 @@ namespace Pool
             maxLvl = (int)Bar.Maximum;
         }
 
-        private void StopProgram()
+        public void SetWater(object sender, int level)
         {
-            
-        }
-
-        private void StartProgram()
-        {
-            
-        }
-
-        void UpWater(Pump tap)
-        {
-            
-        }
-
-        void DownWater(Pump pump)
-        {
-            
-        }
-
-        private void Work(Pump pump)
-        {
-            
-        }
-
-        private async void pump1_Click(object sender, RoutedEventArgs e)
-        {
-            int num = int.Parse(((Button)sender).Tag.ToString());
-            
-        }
-
-        private void StartStop_Click(object sender, RoutedEventArgs e)
-        {
-            
+            WaterLvl = level;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (!isWorking)
+            {
+                isWorking = true;
+                foreach (var pump in listPums)
+                {
+                    pump.SetWater += SetWater;
+                    if (pump.Forse >= 0 && pump.IsPowered)
+                    {
+                        pump.StartThred();
+                    }
+                }
+            }
+            else
+            {
+                foreach (var pump in listPums)
+                {
+                    pump.StopThred();
+                    pump.SetWater -= SetWater;
+                    isWorking = false;
+                }
+            }
+        }
+
+        private void PumpOnOff_Click(object sender, RoutedEventArgs e)
+        {
+            Pump t = (sender as Button).Tag as Pump;
+            t.IsPowered = !t.IsPowered;
         }
     }
 }

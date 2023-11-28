@@ -4,31 +4,32 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pool
 {
     public class Pump : INotifyPropertyChanged
     {
-        private int forse;
+
+        public int ID { get; set; }
+        private int ups = 10;
+        private static int currentLvl = 1;
         private bool isOn = true;
-        private bool isTap;
-        public int Num {  get; set; }
+        private bool isPowered = true;  
 
-        public int Force
-        {
-            get => forse;
-            set
-            {
-                if ((IsTap && value < 0) || (!IsTap && value > 0))
-                {
-                    forse = -value;
-                    return;
-                }
-                forse = value;
+        public static Mutex mutex = new();
+        public Task taskPump;
 
-            }
-        }
+
+        public delegate void PumpEvent(object sender, int level);
+        public event PumpEvent SetWater;
+
+
+        public int Forse {  get; set; }
+        
+
+        public int Speed {  get; set; }
 
         public bool IsOn
         {
@@ -43,22 +44,62 @@ namespace Pool
             }
         }
 
-        public bool IsTap
+        public bool IsPowered
         {
-            get => isTap;
-            set => isTap = value;
+            get => isPowered;
+            set
+            {
+                if (isPowered != value)
+                {
+                    isPowered = value;
+                    if (!isPowered)
+                        StopThred();
+                    else if(isPowered && SetWater != null)
+                        StartThred();
+                    OnPropertyChanged(nameof(IsPowered));
+                }
+            }
         }
 
-        public Pump(int num, int force, bool isTap = false)
+        public Pump(int ID, int forse)
         {
-            IsTap = isTap;
-            Force = force;
-            Num = num;
+            this.ID = ID;
+            Forse = forse;
+            IsOn = true;
         }
 
-        public int NewWaterLvL(int waterLvL)
+        public async void StartThred()
         {
-            return IsOn ? waterLvL + Force : waterLvL;
+            if (!IsPowered || taskPump != null)
+                return;
+
+            IsOn = true;
+            taskPump = Task.Run(async () =>
+            {
+                while (IsOn)
+                {
+                    mutex.WaitOne();
+                    currentLvl = NewLvl(currentLvl * ups) / ups;
+                    SetWater(this,currentLvl);
+                    mutex.ReleaseMutex();
+                    await Task.Delay(1000/(ups * Speed));
+                }
+            });
+        }
+
+        private  int NewLvl(int lvl)
+        {
+           return lvl + Forse;
+        }
+        public void StopThred()
+        {
+            IsOn = false;
+            if (taskPump != null)
+            {
+                taskPump.Wait();
+                taskPump.Dispose();
+                taskPump = null;
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
