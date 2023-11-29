@@ -26,6 +26,9 @@ namespace Pool
         public delegate void PumpEvent(int forse, int ups);
         public event PumpEvent SetWater;
 
+        public delegate bool Danger();
+        public event Danger GetDangerZone;
+        
         public int Forse 
         {
             get => forse;
@@ -38,8 +41,6 @@ namespace Pool
             }
         }
         
-
-
         public int Speed
         {
             get => speed;
@@ -75,7 +76,9 @@ namespace Pool
                     isPowered = value;
                     if (!isPowered)
                         StopThred();
-                    else if(isPowered && Forse > 0)
+                    else if (isPowered && Forse > 0)
+                        StartThred();
+                    else if (GetDangerZone())
                         StartThred();
 
                     OnPropertyChanged(nameof(IsPowered));

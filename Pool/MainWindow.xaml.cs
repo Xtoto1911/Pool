@@ -155,16 +155,9 @@ namespace Pool
             maxLvl = (int)Bar.Maximum;
         }
 
-        public void SetWater(int forse, int ups)
-        {
-            WaterLvl = (WaterLvl * ups + forse)/ups;
-        }
+        public void SetWater(int forse, int ups) => WaterLvl = (WaterLvl * ups + forse) / ups;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        public bool GetDangerZone() => DangerZone;
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -174,6 +167,7 @@ namespace Pool
                 foreach (var pump in listPlumpung)
                 {
                     pump.SetWater += SetWater;
+                    pump.GetDangerZone += GetDangerZone;
                     if (pump.Forse >= 0 && pump.IsPowered)
                     {
                         pump.StartThred();
@@ -197,5 +191,13 @@ namespace Pool
             Plumpung t = (sender as Button).Tag as Plumpung;
             t.IsPowered = !t.IsPowered;
         }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        
     }
 }
