@@ -18,16 +18,13 @@ namespace Pool
         private int speed = 1;
         private bool isOn = true;
         private bool isPowered = true;
-        private static bool isDangerZone = false;
+        private bool isDangerZone = false;
 
         public static Mutex mutex = new();
         public Task taskPump;
 
-
         public  delegate void PumpEvent(int forse, int ups);
         public  event PumpEvent SetWater;
-
-        public delegate bool Danger();
         
         public int Forse 
         {
@@ -64,9 +61,8 @@ namespace Pool
                     isPowered = value;
                     if (!isPowered)
                         StopThred();
-                    else if (isPowered && Forse > 0 || DangerZone && Forse < 0)
+                    else if(isPowered && (Forse > 0 || Forse < 0 && DangerZone))
                         StartThred();
-
                     OnPropertyChanged(nameof(IsPowered));
                 }
             }
@@ -77,10 +73,14 @@ namespace Pool
             get => isDangerZone;
             set
             {
-                if (IsPowered && DangerZone && Forse < 0)
-                    StartThred();
-                else if (IsPowered && !DangerZone && Forse < 0)
-                    StopThred();
+                if (isDangerZone != value)
+                {
+                    isDangerZone = value;
+                    if (IsPowered && DangerZone && Forse < 0)
+                        StartThred();
+                    else if (IsPowered && !DangerZone && Forse < 0)
+                        StopThred();
+                }
             }
         }
 
