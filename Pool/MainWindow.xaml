@@ -25,7 +25,7 @@
                 <ColumnDefinition Width="50*"/>
                 <ColumnDefinition Width="50*"/>
             </Grid.ColumnDefinitions>
-            <ListView ItemsSource="{Binding Pumps}">
+            <ListView ItemsSource="{Binding Plumpung}">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel HorizontalAlignment="Center"

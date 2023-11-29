@@ -9,14 +9,13 @@ using System.Threading.Tasks;
 
 namespace Pool
 {
-    public class Pump : INotifyPropertyChanged
+    public class Plumpung : INotifyPropertyChanged
     {
 
         public int ID { get; set; }
         private int ups = 10;
         private int forse;
         private int speed = 1;
-        private static int currentLvl = 1;
         private bool isOn = true;
         private bool isPowered = true;  
 
@@ -24,9 +23,8 @@ namespace Pool
         public Task taskPump;
 
 
-        public delegate void PumpEvent(object sender, int level);
+        public delegate void PumpEvent(int forse, int ups);
         public event PumpEvent SetWater;
-
 
         public int Forse 
         {
@@ -40,6 +38,7 @@ namespace Pool
             }
         }
         
+
 
         public int Speed
         {
@@ -76,49 +75,46 @@ namespace Pool
                     isPowered = value;
                     if (!isPowered)
                         StopThred();
-                    else if(isPowered && SetWater != null)
+                    else if(isPowered && Forse > 0)
                         StartThred();
+
                     OnPropertyChanged(nameof(IsPowered));
                 }
             }
         }
 
-        public Pump(int ID, int forse)
+        public Plumpung(int ID, int forse)
         {
             this.ID = ID;
             Forse = forse;
             IsOn = true;
         }
 
-        public async void StartThred()
+        public void StartThred()
         {
             if (!IsPowered || taskPump != null)
                 return;
 
             IsOn = true;
-            taskPump = Task.Run(async () =>
+            taskPump = new Task( async() =>
             {
                 while (IsOn)
                 {
                     mutex.WaitOne();
-                    currentLvl = NewLvl(currentLvl * ups) / ups;
-                    SetWater(this,currentLvl);
+                    SetWater(Forse,ups);
                     mutex.ReleaseMutex();
                     await Task.Delay(1000/(ups * Speed));
                 }
             });
+            taskPump.Start();
         }
 
-        private  int NewLvl(int lvl)
-        {
-           return lvl + Forse;
-        }
-        public void StopThred()
+        public async void StopThred()
         {
             IsOn = false;
             if (taskPump != null)
             {
-                taskPump.Wait();
+                await taskPump;
                 taskPump.Dispose();
                 taskPump = null;
             }

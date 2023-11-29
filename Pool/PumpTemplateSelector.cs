@@ -15,7 +15,7 @@ namespace Pool
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
-            if ((item as Pump).Forse >= 0) return PumpIn;
+            if ((item as Plumpung).Forse >= 0) return PumpIn;
             else return PumpOut;
         }
     }
