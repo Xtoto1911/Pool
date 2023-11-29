@@ -17,40 +17,28 @@ namespace Pool
         private int forse;
         private int speed = 1;
         private bool isOn = true;
-        private bool isPowered = true;  
+        private bool isPowered = true;
+        private static bool isDangerZone = false;
 
         public static Mutex mutex = new();
         public Task taskPump;
 
 
-        public delegate void PumpEvent(int forse, int ups);
-        public event PumpEvent SetWater;
+        public  delegate void PumpEvent(int forse, int ups);
+        public  event PumpEvent SetWater;
 
         public delegate bool Danger();
-        public event Danger GetDangerZone;
         
         public int Forse 
         {
             get => forse;
-            set
-            {
-                if (forse != value)
-                {
-                    forse = value;
-                }
-            }
+            set => forse = value;
         }
         
         public int Speed
         {
             get => speed;
-            set
-            {
-                if (speed != value)
-                {
-                    speed = value;
-                }
-            }
+            set => speed = value;
         }
 
         public bool IsOn
@@ -76,13 +64,23 @@ namespace Pool
                     isPowered = value;
                     if (!isPowered)
                         StopThred();
-                    else if (isPowered && Forse > 0)
-                        StartThred();
-                    else if (GetDangerZone())
+                    else if (isPowered && Forse > 0 || DangerZone && Forse < 0)
                         StartThred();
 
                     OnPropertyChanged(nameof(IsPowered));
                 }
+            }
+        }
+
+        public bool DangerZone
+        {
+            get => isDangerZone;
+            set
+            {
+                if (IsPowered && DangerZone && Forse < 0)
+                    StartThred();
+                else if (IsPowered && !DangerZone && Forse < 0)
+                    StopThred();
             }
         }
 

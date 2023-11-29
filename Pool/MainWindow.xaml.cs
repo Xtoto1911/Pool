@@ -32,9 +32,7 @@ namespace Pool
         private static int waterLvl = 10;
         private static int maxLvl;
         private static int forse;
-
         private static bool isWorking = false;
-        private static bool isDangerZone = false;
 
         private ObservableCollection<Plumpung> listPlumpung = new() 
         {
@@ -57,9 +55,11 @@ namespace Pool
                     if (waterLvl < 0)
                         waterLvl = 1;
                     if (waterLvl >= maxLvl * 3/4)
-                        DangerZone = true;
+                        foreach (var item in listPlumpung)
+                            item.DangerZone = true;
                     if (waterLvl <= maxLvl * 1/4)
-                        DangerZone = false;
+                        foreach (var item in listPlumpung)
+                            item.DangerZone = false;
                     OnPropertyChanged(nameof(WaterLvl));
                 }
             }
@@ -93,7 +93,7 @@ namespace Pool
             }
         }
 
-        public ObservableCollection<Plumpung> Plumpung
+        public ObservableCollection<Plumpung> ListPlumpung
         {
             get => listPlumpung;
             set
@@ -106,34 +106,34 @@ namespace Pool
             }
         }
 
-        public bool DangerZone
-        {
-            get => isDangerZone;
-            set
-            {
-                if (isDangerZone != value)
-                {
-                    isDangerZone = value;
-                    if (DangerZone)
-                    {
-                        foreach (var pump in listPlumpung)
-                        {
-                            if (pump.IsPowered && pump.Forse < 0)
-                                pump.StartThred();
-                        }
-                    }
-                    else
-                    {
-                        foreach (var pump in listPlumpung)
-                        {
-                            if(pump.IsPowered && pump.Forse < 0)
-                                pump.StopThred();
-                        }
-                    }
-                    OnPropertyChanged(nameof(DangerZone));
-                }
-            }
-        }
+        //public bool DangerZone
+        //{
+        //    get => isDangerZone;
+        //    set
+        //    {
+        //        if (isDangerZone != value)
+        //        {
+        //            isDangerZone = value;
+        //            if (DangerZone)
+        //            {
+        //                foreach (var pump in listPlumpung)
+        //                {
+        //                    if (pump.IsPowered && pump.Forse < 0)
+        //                        pump.StartThred();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                foreach (var pump in listPlumpung)
+        //                {
+        //                    if(pump.IsPowered && pump.Forse < 0)
+        //                        pump.StopThred();
+        //                }
+        //            }
+        //            OnPropertyChanged(nameof(DangerZone));
+        //        }
+        //    }
+        //}
 
         public bool IsWorking
         {
@@ -157,8 +157,6 @@ namespace Pool
 
         public void SetWater(int forse, int ups) => WaterLvl = (WaterLvl * ups + forse) / ups;
 
-        public bool GetDangerZone() => DangerZone;
-
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if (!IsWorking)
@@ -167,7 +165,6 @@ namespace Pool
                 foreach (var pump in listPlumpung)
                 {
                     pump.SetWater += SetWater;
-                    pump.GetDangerZone += GetDangerZone;
                     if (pump.Forse >= 0 && pump.IsPowered)
                     {
                         pump.StartThred();
@@ -177,11 +174,10 @@ namespace Pool
             else
             {
                 IsWorking = false;
-                DangerZone = false;
                 foreach (var pump in listPlumpung)
                 {
+                    pump.DangerZone = false;
                     pump.StopThred();
-                    pump.SetWater -= SetWater;
                 }
             }
         }

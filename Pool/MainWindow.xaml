@@ -25,7 +25,7 @@
                 <ColumnDefinition Width="50*"/>
                 <ColumnDefinition Width="50*"/>
             </Grid.ColumnDefinitions>
-            <ListView ItemsSource="{Binding Plumpung}">
+            <ListView ItemsSource="{Binding ListPlumpung}">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel HorizontalAlignment="Center"
@@ -38,11 +38,11 @@
                         <local:PumpTemplateSelector.PumpOut>
                             <DataTemplate>
                                 <Button Tag="{Binding}"
-                                    Content="Насос"
-                                    Foreground="White"
-                                    Click="PumpOnOff_Click"
-                                    Width="50"
-                                    Height="50">
+                                        Content="Насос"
+                                        Foreground="White"
+                                        Click="PumpOnOff_Click"
+                                        Width="50"
+                                        Height="50">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Style.Triggers>
