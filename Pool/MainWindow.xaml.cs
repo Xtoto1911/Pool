@@ -24,71 +24,114 @@ namespace Pool
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
-
-
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private static int speed = 1;
-        private static int waterLvl = 10;
-        private static int maxLvl;
-        private static int forse;
-        private static bool isWorking = false;
+        private static byte speed = 1;
+        private static byte ups = 60;
+        private static int waterLvl = 10 * ups;
+        private static int maxLvl = 2000 * ups;
+        private static int forse = 80;
 
-        private ObservableCollection<Plumpung> listPlumpung = new() 
+        private static bool isWorking;
+        private bool isDangerZone;
+
+        public delegate void PoolEvens(object sender);
+        public static event PoolEvens? PoolDangerZoneOn;//событие, когда мы дошли до черты(3/4 объема)
+        public static event PoolEvens? PoolDangerZoneOf;//событие, когда мы дошли до черты(1/4 объема)
+
+        private ObservableCollection<Plumpung> listPlumpung = new()
         {
-            new(0,100),
-            new(1,-20),
-            new(2,-20),
-            new(3,-20),
-            new(4,-20),
-            new(5,-20),
+            new(forse),
+            new(-20),
+            new(-20),
+            new(-20),
+            new(-20),
+            new(-20),
         };
+
+        public MainWindow()
+        {
+            DataContext = this;
+            InitializeComponent();
+            Plumpung.Pool = this;
+        }
+
+        public static byte UPS => ups;
+        public static byte Speed => speed;
+
+        public int UIWaterLvl
+        {
+            get => waterLvl / ups;
+            set { }
+        }
+
+        public int UIMaxLvl
+        {
+            get => maxLvl / ups;
+            set { }
+        }
+
+        public int UIForse
+        {
+            get => forse;
+            set
+            {
+                if (forse != value)
+                {
+                    forse = value;
+                    foreach (var pump in listPlumpung)
+                        if (pump.Forse >= 0)
+                            pump.Forse = value;
+                    OnPropertyChanged(nameof(UIForse));
+                }
+            }
+        }
+
+        public byte UISpeed//ускорение
+        {
+            get => speed;
+            set
+            {
+                if(speed != value)
+                {
+                    speed = value;
+                    OnPropertyChanged(nameof(UISpeed));
+                }
+            }
+        }
 
         public int WaterLvl
         {
             get => waterLvl;
             set
             {
-                if (waterLvl != value)
+                if(waterLvl != value)
                 {
-                    waterLvl = Math.Min(maxLvl,value);
-                    if (waterLvl < 0)
-                        waterLvl = 1;
-                    if (waterLvl >= maxLvl * 3/4)
-                        foreach (var item in listPlumpung)
-                            item.DangerZone = true;
-                    if (waterLvl <= maxLvl * 1/4)
-                        foreach (var item in listPlumpung)
-                            item.DangerZone = false;
-                    OnPropertyChanged(nameof(WaterLvl));
+                    waterLvl = Math.Min(value, maxLvl);
+                    OnPropertyChanged(nameof(UIWaterLvl));
+                    if(!DangerZone && UIWaterLvl >= UIMaxLvl * 3/4)
+                    {
+                        PoolDangerZoneOn?.Invoke(this);
+                        DangerZone = true;
+                    }
+                    else if (DangerZone && UIWaterLvl <= UIMaxLvl * 1 / 4)
+                    {
+                        PoolDangerZoneOf?.Invoke(this);
+                        DangerZone = false;
+                    }
                 }
             }
         }
 
-        public int Forse
+        public bool DangerZone//флаг перехода за границу
         {
-            get => listPlumpung[0].Forse;
+            get => isDangerZone;
             set
             {
-                if (forse != value)
+                if (isDangerZone != value)
                 {
-                    listPlumpung[0].Forse = value;
-                    OnPropertyChanged(nameof(Forse));
-                }
-            }
-        }
-
-        public int Speed
-        {
-            get => speed;
-            set
-            {
-                if(value != speed)
-                {
-                    speed = value;
-                    foreach (var item in listPlumpung)
-                        item.Speed = speed;
-                    OnPropertyChanged(nameof(Speed));
+                    isDangerZone = value;
+                    OnPropertyChanged(nameof(DangerZone));
                 }
             }
         }
@@ -106,35 +149,6 @@ namespace Pool
             }
         }
 
-        //public bool DangerZone
-        //{
-        //    get => isDangerZone;
-        //    set
-        //    {
-        //        if (isDangerZone != value)
-        //        {
-        //            isDangerZone = value;
-        //            if (DangerZone)
-        //            {
-        //                foreach (var pump in listPlumpung)
-        //                {
-        //                    if (pump.IsPowered && pump.Forse < 0)
-        //                        pump.StartThred();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                foreach (var pump in listPlumpung)
-        //                {
-        //                    if(pump.IsPowered && pump.Forse < 0)
-        //                        pump.StopThred();
-        //                }
-        //            }
-        //            OnPropertyChanged(nameof(DangerZone));
-        //        }
-        //    }
-        //}
-
         public bool IsWorking
         {
             get => isWorking;
@@ -148,44 +162,29 @@ namespace Pool
             }
         }
 
-        public MainWindow()
-        {
-            DataContext = this;
-            InitializeComponent();
-            maxLvl = (int)Bar.Maximum;
-        }
-
-        public void SetWater(int forse, int ups) => WaterLvl = (WaterLvl * ups + forse) / ups;
-
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (!IsWorking)
-            {
-                IsWorking = true;
+            if (!IsWorking) {
                 foreach (var pump in listPlumpung)
-                {
-                    pump.SetWater += SetWater;
-                    if (pump.Forse >= 0 && pump.IsPowered)
-                    {
-                        pump.StartThred();
-                    }
-                }
+                    if (pump.Forse >= 0)
+                        pump.StartThred(this);
             }
             else
             {
-                IsWorking = false;
                 foreach (var pump in listPlumpung)
-                {
-                    pump.DangerZone = false;
-                    pump.StopThred();
-                }
+                    pump.StopThred(this);
+                DangerZone = false;
             }
+            IsWorking = !IsWorking;
         }
 
         private void PumpOnOff_Click(object sender, RoutedEventArgs e)
         {
-            Plumpung t = (sender as Button).Tag as Plumpung;
-            t.IsPowered = !t.IsPowered;
+            Plumpung pump = (sender as Button).Tag as Plumpung;
+            pump.IsPowered = !pump.IsPowered;
+            if(IsWorking && pump.IsPowered)
+                if (pump.Forse < 0 && DangerZone || pump.Forse >= 0)
+                    pump.StartThred(this);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -194,6 +193,10 @@ namespace Pool
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            foreach(var pumps in listPlumpung)
+                pumps.StopThred(this);
+        }
     }
 }

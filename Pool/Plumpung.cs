@@ -11,43 +11,21 @@ namespace Pool
 {
     public class Plumpung : INotifyPropertyChanged
     {
+        public int Forse { get; set; }
+        private bool isOn;//состояние работы
+        private bool isPowered = true;//питание
 
-        public int ID { get; set; }
-        private int ups = 10;
-        private int forse;
-        private int speed = 1;
-        private bool isOn = true;
-        private bool isPowered = true;
-        private bool isDangerZone = false;
+        private static Mutex mutex = new();
+        private Task taskPump;
+        public static MainWindow Pool;
 
-        public static Mutex mutex = new();
-        public Task taskPump;
-
-        public  delegate void PumpEvent(int forse, int ups);
-        public  event PumpEvent SetWater;
-        
-        public int Forse 
+        public Plumpung(int forse)
         {
-            get => forse;
-            set => forse = value;
-        }
-        
-        public int Speed
-        {
-            get => speed;
-            set => speed = value;
-        }
-
-        public bool IsOn
-        {
-            get => isOn;
-            set
+            Forse = forse;
+            if(Forse < 0)
             {
-                if (isOn != value)
-                {
-                    isOn = value;
-                    OnPropertyChanged(nameof(IsOn));
-                }
+                MainWindow.PoolDangerZoneOn += StartThred;
+                MainWindow.PoolDangerZoneOf += StopThred;
             }
         }
 
@@ -60,59 +38,34 @@ namespace Pool
                 {
                     isPowered = value;
                     if (!isPowered)
-                        StopThred();
-                    else if(isPowered && (Forse > 0 || Forse < 0 && DangerZone))
-                        StartThred();
+                        StopThred(Pool);
                     OnPropertyChanged(nameof(IsPowered));
                 }
             }
         }
 
-        public bool DangerZone
+        public void StartThred(object sender)
         {
-            get => isDangerZone;
-            set
-            {
-                if (isDangerZone != value)
-                {
-                    isDangerZone = value;
-                    if (IsPowered && DangerZone && Forse < 0)
-                        StartThred();
-                    else if (IsPowered && !DangerZone && Forse < 0)
-                        StopThred();
-                }
-            }
-        }
-
-        public Plumpung(int ID, int forse)
-        {
-            this.ID = ID;
-            Forse = forse;
-            IsOn = true;
-        }
-
-        public void StartThred()
-        {
-            if (!IsPowered || taskPump != null)
+            if (!isPowered)
                 return;
-
-            IsOn = true;
+            isOn = true;
             taskPump = new Task( async() =>
             {
-                while (IsOn)
+                while (isOn)
                 {
                     mutex.WaitOne();
-                    SetWater(Forse,ups);
+                    Pool.WaterLvl += Forse;
                     mutex.ReleaseMutex();
-                    await Task.Delay(1000/(ups * Speed));
+                    int delay = 1000 / (MainWindow.UPS * MainWindow.Speed);
+                    await Task.Delay(delay);
                 }
             });
             taskPump.Start();
         }
 
-        public async void StopThred()
+        public async void StopThred(object sender)
         {
-            IsOn = false;
+            isOn = false;
             if (taskPump != null)
             {
                 await taskPump;

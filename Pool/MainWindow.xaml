@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pool"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" Closed="Window_Closed">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="239*"/>
@@ -14,8 +14,8 @@
         <ProgressBar x:Name="Bar"
                      Orientation="Vertical"
                      Minimum="0"
-                     Maximum="2000"
-                     Value="{Binding WaterLvl}">
+                     Maximum="{Binding UIMaxLvl}"
+                     Value="{Binding UIWaterLvl}">
             <ProgressBar.Foreground>
                 <SolidColorBrush Color="Aqua"/>
             </ProgressBar.Foreground>
@@ -46,12 +46,12 @@
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsOn}" Value="False">
+                                                <DataTrigger Binding="{Binding IsPowered}" Value="False">
                                                     <Setter Property="Background" Value="Gray"/>
                                                 </DataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsOn}" Value="True"/>
+                                                        <Condition Binding="{Binding IsPowered}" Value="True"/>
                                                         <Condition Binding="{Binding DataContext.DangerZone, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
                                                     </MultiDataTrigger.Conditions>
                                                     <MultiDataTrigger.Setters>
@@ -60,7 +60,7 @@
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsOn}" Value="True"/>
+                                                        <Condition Binding="{Binding IsPowered}" Value="True"/>
                                                         <Condition Binding="{Binding DataContext.DangerZone, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"/>
                                                     </MultiDataTrigger.Conditions>
                                                     <MultiDataTrigger.Setters>
@@ -85,27 +85,12 @@
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsOn}" Value="False">
+                                                <DataTrigger Binding="{Binding IsPowered}" Value="False">
                                                     <Setter Property="Background" Value="Gray"/>
                                                 </DataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsOn}" Value="True"/>
-                                                        <Condition Binding="{Binding DataContext.NeedPump, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <MultiDataTrigger.Setters>
-                                                        <Setter Property="Background" Value="Yellow"/>
-                                                    </MultiDataTrigger.Setters>
-                                                </MultiDataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsOn}" Value="True"/>
-                                                        <Condition Binding="{Binding DataContext.NeedPump, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <MultiDataTrigger.Setters>
-                                                        <Setter Property="Background" Value="Blue"/>
-                                                    </MultiDataTrigger.Setters>
-                                                </MultiDataTrigger>
+                                                <DataTrigger Binding="{Binding IsPowered}" Value="True">
+                                                    <Setter Property="Background" Value="Green"/>
+                                                </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Button.Style>
@@ -124,11 +109,11 @@
                 <StackPanel>
                     <Label VerticalAlignment="Top"
                             Height="Auto">
-                        <TextBlock Text="{Binding Forse, 
+                        <TextBlock Text="{Binding UIForse, 
                                           StringFormat= Заполнение {0} л/с}"
                                     TextWrapping="Wrap"/>
                     </Label>
-                    <Slider Value="{Binding Forse, 
+                    <Slider Value="{Binding UIForse, 
                                         Mode=TwoWay, 
                                         UpdateSourceTrigger=PropertyChanged}"
                             Maximum="100"
@@ -139,11 +124,11 @@
                             >
                     <Label VerticalAlignment="Top"
                            Height="Auto">
-                        <TextBlock Text="{Binding Speed, 
+                        <TextBlock Text="{Binding UISpeed, 
                                           StringFormat= Ускорение {0} x}"
                                    TextWrapping="Wrap"/>
                     </Label>
-                    <Slider Value="{Binding Speed, 
+                    <Slider Value="{Binding UISpeed, 
                                             Mode=TwoWay, 
                                             UpdateSourceTrigger=PropertyChanged}"
                             Maximum="3"
@@ -171,7 +156,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <Label Content="{Binding WaterLvl}" HorizontalAlignment="Left" Margin="56,17,0,0" Grid.Row="2" VerticalAlignment="Top"/>
+                <Label Content="{Binding UIWaterLvl}" HorizontalAlignment="Left" Margin="56,17,0,0" Grid.Row="2" VerticalAlignment="Top"/>
             </Grid>
         </Grid>
     </Grid>
