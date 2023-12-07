@@ -49,7 +49,7 @@ namespace Pool
             if (!isPowered)
                 return;
             isOn = true;
-            taskPump = new Task( async() =>
+            taskPump =  Task.Run(() =>
             {
                 while (isOn)
                 {
@@ -57,10 +57,9 @@ namespace Pool
                     Pool.WaterLvl += Forse;
                     mutex.ReleaseMutex();
                     int delay = 1000 / (MainWindow.UPS * MainWindow.Speed);
-                    await Task.Delay(delay);
+                    Thread.Sleep(delay);
                 }
             });
-            taskPump.Start();
         }
 
         public async void StopThred(object sender)

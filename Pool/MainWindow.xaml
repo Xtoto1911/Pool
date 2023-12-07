@@ -136,7 +136,7 @@
                 </StackPanel>
                 <Button Height="50"
                         Width="50"
-                        Click="Button_Click"
+                        Click="SystemOnOf_Click"
                         Foreground="White"
                         Grid.Row="2">
                     <Button.Style>
@@ -156,7 +156,12 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <Label Content="{Binding UIWaterLvl}" HorizontalAlignment="Left" Margin="56,17,0,0" Grid.Row="2" VerticalAlignment="Top"/>
+                <Label Content="{Binding UIWaterLvl}" 
+                       HorizontalAlignment="Left" 
+                       Margin="56,17,0,0" 
+                       Grid.Row="2" 
+                       VerticalAlignment="Top" 
+                       FontSize="20"/>
             </Grid>
         </Grid>
     </Grid>

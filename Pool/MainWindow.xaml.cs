@@ -162,7 +162,7 @@ namespace Pool
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void SystemOnOf_Click(object sender, RoutedEventArgs e)
         {
             if (!IsWorking) {
                 foreach (var pump in listPlumpung)
